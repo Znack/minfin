@@ -574,7 +574,9 @@
             items : inData
         };
 
-        hashNames = Object.keys(hashNames);
+        hashNames = rawData.values.map(function(entry) {
+            return entry.key || entry.name
+        });
 
         colors
             .range(d3.range(0, 300, 500/(hashNames.length||1)))
