@@ -247,7 +247,7 @@ path.link {
 
 #surfaceContainer .dot circle {
     stroke: #444;
-    stroke-width: 1;
+    stroke-width: 5px;
     fill: #000;
     cursor: help;
 }
