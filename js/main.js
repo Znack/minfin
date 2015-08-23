@@ -568,68 +568,10 @@
             return initTree(data);
         }
 
-        var lastName
-            , level
-            , subLevel
-            , subSubLevel
-            , reg = /^[IVX]+/
-            , reg2 = /^\d+/
-            , reg3 = /^.\)/
-            ;
-
-        data = d3.nest()
-            .key(function(d) {
-                return d.level;
-            })
-            .key(function(d) {
-                return d.subLevel;
-            })
-            .key(function(d) {
-                return d.subSubLevel;
-            })
-            .key(function(d) {
-                return d.name;
-            })
-            .key(function(d) {
-                return d.year;
-            })
-            .entries(inData.filter(function(d) {
-                lastName = d.name || lastName;
-
-                if (lastName == "Содержание органов государственного управления") {
-                    lastName = "1. " + lastName;
-                }
-                else if (lastName == "Судебные учреждения, прокуратура и нотариат") {
-                    lastName = "2. " + lastName;
-                }
-
-                d.name = lastName;
-                hashNames[lastName] = 1;
-
-                if (reg.test(d.name)) {
-                    level = d.name;
-                    subLevel = level;
-                    subSubLevel = level;
-                } else if (reg2.test(d.name)) {
-                    subLevel = d.name;
-                    subSubLevel = subLevel;
-                } else if (reg3.test(d.name)) {
-                    subSubLevel = d.name;
-                }
-
-                d.level = level;
-                d.subLevel = subLevel;
-                d.subSubLevel = subSubLevel;
-
-                fixCosts(d);
-
-                return d.year && d.name != "Итого расходов";
-            }))
-        ;
         rawData = {
             key : "История бюджета 1937 - 1950гг.",
-            values : data,
-            items : data
+            values : inData,
+            items : inData
         };
 
         hashNames = Object.keys(hashNames);
@@ -705,7 +647,7 @@
                 .position(e.loaded);
         }
     }).loadData(
-        ['data/1937-1940.csv', 'data/1941-1945.csv', 'data/1946-1950.csv']
+        ['data/data.json']
         , dataParsing
     );
 
