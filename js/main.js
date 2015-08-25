@@ -604,7 +604,6 @@
             if (d.key == parent.key) {
                 if (parent.items.length > 1) {
                     d.metric = 0;
-                    return;
                 }
 
                 parent.items = arr;
@@ -622,14 +621,20 @@
         var ancestor = d.parent;
         var ancestors = [];
 
-        while (ancestor) {
+        while (ancestor.parent) {
             ancestors.push(ancestor);
             ancestor = ancestor.parent;
         }
         var i = ancestors.length;
 
         while (i--) {
-            d[getLevelName(i)] = ancestor.key;
+            d.values[0][getLevelName(i)] = ancestors[ancestors.length - i - 1].key;
+        }
+
+        i = ancestors.length;
+        while (i < 3) {
+            d.values[0][getLevelName(i)] = ancestors[0].key;
+            i++;
         }
     }
 
@@ -645,7 +650,7 @@
 
         var currentDepth = depth;
         var baseLevelName = 'SubLevel';
-        while (currentDepth > 1) {
+        while (currentDepth > 2) {
             baseLevelName = 'Sub' + baseLevelName;
             currentDepth--;
         }
