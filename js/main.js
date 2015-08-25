@@ -531,25 +531,6 @@
         tree && tree.data(rawData, selected);
     }
 
-    /**
-     * @param {string} cost
-     * @returns {number}
-     */
-    function fixCost(cost) {
-        return !cost || cost == "-" ? 0 : parseFloat(cost.replace(',', '.'));
-    }
-
-    var costKeys = Object.keys(metrics);
-    function fixCosts(d) {
-        var key
-            , i = costKeys.length
-            ;
-
-        while(i--)
-            if (d.hasOwnProperty(key = costKeys[i]))
-                d[key] = fixCost(d[key]);
-    }
-
     function dataParsing(err, inData) {
         var data = []
             , hashNames = {}
@@ -594,6 +575,7 @@
 
     function restructure(parent) {
         return function (d) {
+            d.parent = parent;
             if (!d.values)
                 return;
 
@@ -602,6 +584,7 @@
             d.tree_id = d.key;
 
             if (yearReg.test(d.key)) {
+                setLevels(d);
                 d.tree_id = parent.key + '_' + d.key;
                 d.metric = d.values[0][selectedMetric];
 
@@ -633,6 +616,41 @@
 
             arr.forEach(restructure(curParent));
         }
+    }
+
+    function setLevels (d) {
+        var ancestor = d.parent;
+        var ancestors = [];
+
+        while (ancestor) {
+            ancestors.push(ancestor);
+            ancestor = ancestor.parent;
+        }
+        var i = ancestors.length;
+
+        while (i--) {
+            d[getLevelName(i)] = ancestor.key;
+        }
+    }
+
+    function getLevelName (depth) {
+        depth = parseInt(depth, 10);
+        if (isNaN(depth)) throw new Error('Incorrect depth');
+
+        if (depth === 0) {
+            return 'level';
+        } else if (depth === 1) {
+            return 'subLevel';
+        }
+
+        var currentDepth = depth;
+        var baseLevelName = 'SubLevel';
+        while (currentDepth > 1) {
+            baseLevelName = 'Sub' + baseLevelName;
+            currentDepth--;
+        }
+
+        return 'sub' + baseLevelName;
     }
 
     app.dataLoader({
