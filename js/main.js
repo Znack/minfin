@@ -584,7 +584,6 @@
             d.tree_id = d.key;
 
             if (yearReg.test(d.key)) {
-                setLevels(d);
                 d.tree_id = parent.key + '_' + d.key;
                 d.metric = d.values[0][selectedMetric];
 
@@ -604,6 +603,7 @@
             if (d.key == parent.key) {
                 if (parent.items.length > 1) {
                     d.metric = 0;
+                    return;
                 }
 
                 parent.items = arr;
@@ -615,47 +615,6 @@
 
             arr.forEach(restructure(curParent));
         }
-    }
-
-    function setLevels (d) {
-        var ancestor = d.parent;
-        var ancestors = [];
-
-        while (ancestor.parent) {
-            ancestors.push(ancestor);
-            ancestor = ancestor.parent;
-        }
-        var i = ancestors.length;
-
-        while (i--) {
-            d.values[0][getLevelName(i)] = ancestors[ancestors.length - i - 1].key;
-        }
-
-        i = ancestors.length;
-        while (i < 3) {
-            d.values[0][getLevelName(i)] = ancestors[0].key;
-            i++;
-        }
-    }
-
-    function getLevelName (depth) {
-        depth = parseInt(depth, 10);
-        if (isNaN(depth)) throw new Error('Incorrect depth');
-
-        if (depth === 0) {
-            return 'level';
-        } else if (depth === 1) {
-            return 'subLevel';
-        }
-
-        var currentDepth = depth;
-        var baseLevelName = 'SubLevel';
-        while (currentDepth > 2) {
-            baseLevelName = 'Sub' + baseLevelName;
-            currentDepth--;
-        }
-
-        return 'sub' + baseLevelName;
     }
 
     app.dataLoader({
