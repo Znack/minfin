@@ -16,6 +16,7 @@
 
         var that = this
             , rawData
+            , scsv = d3.dsv(';', "text/csv")
             ;
 
         that.options = {
@@ -49,7 +50,7 @@
          * @param {DataRequestCallback} callback
          */
         function getData(d, callback) {
-            var xhr = d3.json(d, callback);
+            var xhr = scsv(d, callback);
 
             ['beforesend', 'progress'].forEach(function(d) {
                 app.isFun(that.options[d])

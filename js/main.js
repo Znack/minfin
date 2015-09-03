@@ -531,6 +531,25 @@
         tree && tree.data(rawData, selected);
     }
 
+    /**
+     * @param {string} cost
+     * @returns {number}
+     */
+    function fixCost(cost) {
+        return !cost || cost == "-" ? 0 : parseFloat(cost.replace(',', '.'));
+    }
+
+    var costKeys = Object.keys(metrics);
+    function fixCosts(d) {
+        var key
+            , i = costKeys.length
+            ;
+
+        while(i--)
+            if (d.hasOwnProperty(key = costKeys[i]))
+                d[key] = fixCost(d[key]);
+    }
+
     function dataParsing(err, inData) {
         var data = []
             , hashNames = {}
@@ -549,15 +568,72 @@
             return initTree(data);
         }
 
+        var lastName
+            , level
+            , subLevel
+            , subSubLevel
+            , reg = /^[IVX]+/
+            , reg2 = /^\d+/
+            , reg3 = /^.\)/
+            , transformedData = inData.filter(function(d, index, array) {
+                lastName = d.name || lastName;
+
+                if (lastName == "Содержание органов государственного управления") {
+                    lastName = "1. " + lastName;
+                }
+                else if (lastName == "Судебные учреждения, прокуратура и нотариат") {
+                    lastName = "2. " + lastName;
+                }
+
+                d.name = lastName;
+                hashNames[lastName] = 1;
+
+                if (reg.test(d.name)) {
+                    level = d.name;
+                    subLevel = level;
+                    subSubLevel = level;
+                } else if (reg2.test(d.name)) {
+                    subLevel = d.name;
+                    subSubLevel = subLevel;
+                } else if (reg3.test(d.name)) {
+                    subSubLevel = d.name;
+                }
+
+                d.level = level;
+                d.subLevel = subLevel;
+                d.subSubLevel = subSubLevel;
+
+                fixCosts(d);
+
+                return d.year && d.name !== "Итого расходов";
+            })
+            ;
+
+        data = d3.nest()
+            .key(function(d) {
+                return d.level;
+            })
+            .key(function(d) {
+                return d.subLevel;
+            })
+            .key(function(d) {
+                return d.subSubLevel;
+            })
+            .key(function(d) {
+                return d.name;
+            })
+            .key(function(d) {
+                return d.year;
+            })
+            .entries(transformedData)
+        ;
         rawData = {
             key : "История бюджета 1937 - 1950гг.",
-            values : inData,
-            items : inData
+            values : data,
+            items : data
         };
 
-        hashNames = rawData.values.map(function(entry) {
-            return entry.key || entry.name
-        });
+        hashNames = Object.keys(hashNames);
 
         colors
             .range(d3.range(0, 300, 500/(hashNames.length||1)))
@@ -573,7 +649,9 @@
         initTree(rawData);
     }
 
+    var globalParentIndex = 0;
     function restructure(parent) {
+        globalParentIndex += 1;
         return function (d) {
             d.parent = parent;
             if (!d.values)
@@ -581,10 +659,10 @@
 
             var maxMetricKey;
 
-            d.tree_id = d.key;
+            d.tree_id = globalParentIndex;
 
             if (yearReg.test(d.key)) {
-                d.tree_id = parent.key + '_' + d.key;
+                d.tree_id = globalParentIndex + '_' + d.key;
                 d.metric = d.values[0][selectedMetric];
 
                 maxMetricKey = "mv_" + selectedMetric;
@@ -600,7 +678,9 @@
             var arr = d.values
                 , curParent = d
                 ;
-            if (d.key == parent.key) {
+            if (d.key === parent.key) {
+                d.tree_id = parent.tree_id;
+
                 if (parent.items.length > 1) {
                     d.metric = 0;
                     return;
@@ -631,7 +711,7 @@
                 .position(e.loaded);
         }
     }).loadData(
-        ['data/data.json']
+        ['data/1937-1940.csv'   ]
         , dataParsing
     );
 
