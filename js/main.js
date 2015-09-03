@@ -403,6 +403,21 @@
         return "rgba(" + parseInt(c.r) + "," + parseInt(c.g) + "," + parseInt(c.b) + "," + o + ")";
     }
 
+    function displayOrHideMetrics(d) {
+        if (d.parent) {
+            metricsContainer.div.transition()
+                .duration(300)   //mouseover transition does not seem to work, but that's minor
+                .style("opacity", 0)
+                .transition()
+                .style("display", "none");
+        } else {
+            metricsContainer.div.transition()
+                .duration(300)   //mouseover transition does not seem to work, but that's minor
+                .style("opacity", 1)
+                .style("display", "block");
+        }
+    }
+
     function treeColor(d) {
         var key = d.key
             , l = 0
@@ -497,6 +512,7 @@
     function treeItemSelect(d) {
         setWait();
         makeSurface(d);
+        displayOrHideMetrics(d);
         unsetWait();
     }
 
