@@ -21,6 +21,7 @@
         , colors = d3.scale.ordinal()
             .range(d3.range(50, 300, 20))
         , yearReg = /^\d{4}$/
+        , startDate = new Date()
         ;
 
     var ui = d3.select('#ui')
@@ -567,6 +568,7 @@
     }
 
     function dataParsing(err, inData) {
+        console.log('loaded', startDate - new Date());
         var data = []
             , hashNames = {}
             ;
@@ -663,6 +665,8 @@
 
         rawData.values.forEach(restructure(rawData));
         initTree(rawData);
+        console.log('handled', startDate - new Date());
+
     }
 
     var globalParentIndex = 0;
@@ -713,24 +717,28 @@
         }
     }
 
-    app.dataLoader({
-        beforesend : function() {
-            progress.title('loading...')
-                .max(100)
-                .position(20);
-        },
-        progress : function(e) {
-            if (!d3.event)
-                return;
-            e = d3.event;
-            progress.max(e.total)
-                .position(e.loaded);
-        }
-    }).loadData(
-        ['data/1937-1940.csv'   ]
-        , dataParsing
-    );
+    function loadDataAndParseIt () {
+        app.dataLoader({
+            beforesend : function() {
+                progress.title('loading...')
+                    .max(100)
+                    .position(20);
+            },
+            progress : function(e) {
+                if (!d3.event)
+                    return;
+                e = d3.event;
+                progress.max(e.total)
+                    .position(e.loaded);
+            }
+        }).loadData(
+            ['data/1937-1940.csv'   ]
+            , dataParsing
+        );
+    }
 
+
+    loadDataAndParseIt();
     resize();
 
     // fixed zoom event

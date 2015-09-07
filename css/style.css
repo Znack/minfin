@@ -577,3 +577,7 @@ path.link {
 #info a:visited {
     color: greenyellow;
 }
+
+#range-datepicker {
+    display: none;
+}
