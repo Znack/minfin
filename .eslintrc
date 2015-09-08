@@ -1,0 +1,52 @@
+{
+  "rules": {
+    "quotes": [0],
+    "no-use-before-define": [1, "nofunc"],
+    "curly": [2, "multi-line"],
+    "camelcase": [1, {"properties": "never"}],
+    "no-unused-vars": [0, {"vars": "local", "args": "all"}],
+    "comma-dangle": [1, "always-multiline"],
+    "no-labels": [0],
+    "no-underscore-dangle": [0],
+    "global-strict": [0],
+    "strict": [0],
+    "no-console": [0],
+    "no-shadow": [0],
+    "no-loop-func": [0],
+    "no-alert": [0],
+    "no-new-func": [0],
+    "no-trailing-spaces": [0],
+
+
+
+    "no-extra-semi": [0],
+    "no-multi-spaces": [0],
+    "no-extra-semi": [0]
+  },
+  "globals": {
+    // Common globals
+    "setInterval": true,
+    "setTimeout": true,
+    "clearInterval": true,
+    "clearTimeout": true,
+
+    // Front end globals
+    "window": true,
+    "d3": true,
+    "document": true,
+    "navigator": true,
+    "$": true,
+    "console": true,
+    "localStorage": true,
+    "app": true,
+    "layers": true,
+
+    // Server side globals
+    "global": true,
+    "require": true,
+    "module": true,
+    "exports": true,
+    "process": true,
+    "__dirname": true
+  }
+}

@@ -6,22 +6,23 @@
 "use strict";
 
 (function() {
-    var rawData
+    var developmentMode = true
+        , rawData
         , tree
         , width = innerWidth
         , height = innerHeight
         , selectedMetric
         , selectedData
         , metrics = {
-            total_budget : "Итого по бюджетам"
-            , resp_budgets : "Республиканские бюджеты"
-            , local_budgets : "Местные бюджеты"
-            , union_budget : "Союзный бюджет"
+            Effectiveness : "Итого по бюджетам"
+            , Load : "Республиканские бюджеты"
+            , Quality : "Местные бюджеты"
+            , NSabonents : "Союзный бюджет"
         }
         , colors = d3.scale.ordinal()
             .range(d3.range(50, 300, 20))
-        , yearReg = /^\d{4}$/
-        , startDate = new Date()
+        , yearReg = /^\d\d\.\d\d\.\d\d\d\d$/
+        //, yearReg = /^\d{4}$/
         ;
 
     var ui = d3.select('#ui')
@@ -209,17 +210,17 @@
     var surface = layers.surface().addTo(surfaceContainer.div);
 
     var zero = {
-        value : 0,
-        data : null,
-        normalized : 0
+        value: 0,
+        data: null,
+        normalized: 0
     };
     function getZero(name, year) {
         return name ? {
-            value : 0,
-            data : null,
-            name : name,
-            year : year,
-            normalized : 0
+            value: 0,
+            data: null,
+            name: name,
+            year: year,
+            normalized: 0,
         } : zero;
     }
 
@@ -568,7 +569,6 @@
     }
 
     function dataParsing(err, inData) {
-        console.log('loaded', startDate - new Date());
         var data = []
             , hashNames = {}
             ;
@@ -596,10 +596,10 @@
             , transformedData = inData.filter(function(d, index, array) {
                 lastName = d.name || lastName;
 
-                if (lastName == "Содержание органов государственного управления") {
+                if (lastName === "Содержание органов государственного управления") {
                     lastName = "1. " + lastName;
                 }
-                else if (lastName == "Судебные учреждения, прокуратура и нотариат") {
+                else if (lastName === "Судебные учреждения, прокуратура и нотариат") {
                     lastName = "2. " + lastName;
                 }
 
@@ -665,7 +665,6 @@
 
         rawData.values.forEach(restructure(rawData));
         initTree(rawData);
-        console.log('handled', startDate - new Date());
 
     }
 
@@ -714,10 +713,22 @@
             }
 
             arr.forEach(restructure(curParent));
-        }
+        };
     }
 
-    function loadDataAndParseIt () {
+    function loadDataAndParseIt (options) {
+        var url = 'http://mondzo.ddns.net:4077/execsvcscriptplain?name=testAuth&startparam1=data&';
+        if (developmentMode) {
+            url = 'data/sample.csv?';
+        }
+
+        if (options && options.startDate) {
+            url += 'startparam2=' + options.startDate + '&';
+        }
+        if (options && options.finishDate) {
+            url += 'startparam3=' + options.finishDate + '&';
+        }
+
         app.dataLoader({
             beforesend : function() {
                 progress.title('loading...')
@@ -725,14 +736,13 @@
                     .position(20);
             },
             progress : function(e) {
-                if (!d3.event)
-                    return;
+                if (!d3.event) return;
                 e = d3.event;
                 progress.max(e.total)
                     .position(e.loaded);
-            }
+            },
         }).loadData(
-            ['data/1937-1940.csv'   ]
+            [url]
             , dataParsing
         );
     }
@@ -741,31 +751,31 @@
     loadDataAndParseIt();
     resize();
 
+    app.dateTimePicker.onChange(function (dates) {
+        loadDataAndParseIt({
+            startDate: dates.start,
+            finishDate: dates.finish,
+        });
+    });
+
     // fixed zoom event
 
     var timerResize;
     d3.select(document.querySelector("#zoomEvent").contentWindow)
         .on('resize', function() {
-            if(timerResize)
-                clearTimeout(timerResize);
+            if (timerResize) clearTimeout(timerResize);
             timerResize = setTimeout(resize, 300);
-        })
-    ;
+        });
 
     function template(template, item) {
         if (!template || !item)
             return "";
 
         for(var key in item) {
-            if(!item.hasOwnProperty(key))
-                continue;
+            if(!item.hasOwnProperty(key)) continue;
             template = template.replace("{{" + key + "}}", item[key]);
         }
 
         return template;
     }
-
-    setTimeout(function() {
-        d3.select('#info').classed('open', false);
-    }, 3000);
 })();
