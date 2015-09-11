@@ -473,4 +473,5 @@ path.link {
 #datetime-range-container {
     position: relative;
     z-index: 100;
+    float: left;
 }

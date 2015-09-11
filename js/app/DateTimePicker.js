@@ -8,24 +8,29 @@
     $startInput.val(startVal);
     $finishInput.val(finishVal);
 
+    var baseDateTimePickerParams = {
+      "locale": "ru",
+      "calendarMouseScroll": false,
+    };
+
     // Attach a change event to end time
 
-    $finishInput.appendDtpicker({
+    $finishInput.appendDtpicker($.extend(baseDateTimePickerParams, {
         minDate: startVal,
-    });
+    }));
     $finishInput.change(function() {
-        $startInput.appendDtpicker({
+        $startInput.appendDtpicker($.extend(baseDateTimePickerParams, {
             maxDate: $finishInput.val(), // when the end time changes, update the maxDate on the start field
-        });
+        }));
     });
 
-    $startInput.appendDtpicker({
+    $startInput.appendDtpicker($.extend(baseDateTimePickerParams, {
         maxDate: finishVal,
-    });
+    }));
     $startInput.change(function() {
-        $finishInput.appendDtpicker({
+        $finishInput.appendDtpicker($.extend(baseDateTimePickerParams, {
             minDate: $startInput.val(), // when the start time changes, update the minDate on the end field
-        });
+        }));
     });
 
     app.dateTimePicker = {
