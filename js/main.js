@@ -405,7 +405,7 @@
         return "rgba(" + parseInt(c.r) + "," + parseInt(c.g) + "," + parseInt(c.b) + "," + o + ")";
     }
 
-    function displayOrHideMetrics(d) {
+    function updateMetrics(d) {
         if (d.parent) {
             metricsContainer.div.transition()
                 .duration(300)   //mouseover transition does not seem to work, but that's minor
@@ -512,7 +512,7 @@
     function treeItemSelect(d) {
         setWait();
         makeSurface(d);
-        displayOrHideMetrics(d);
+        updateMetrics(d);
         unsetWait();
     }
 
