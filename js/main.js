@@ -467,8 +467,6 @@
 
                 selectedMetric = d;
 
-                selectedData && updateTree(selectedData);
-
                 selectedData && makeSurface(selectedData);
 
                 unsetWait();
