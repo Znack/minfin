@@ -19,6 +19,7 @@
             , Quality : "Местные бюджеты"
             , NSabonents : "Союзный бюджет"
         }
+        , mainMetric = 'Effectiveness'
         , colors = d3.scale.ordinal()
             .range(d3.range(50, 300, 20))
         , yearReg = /^\d\d\.\d\d\.\d\d\d\d$/
@@ -405,16 +406,17 @@
         return "rgba(" + parseInt(c.r) + "," + parseInt(c.g) + "," + parseInt(c.b) + "," + o + ")";
     }
 
-    function displayOrHideMetrics(d) {
+    function updateMetrics(d) {
         if (d.parent) {
+            changeMetric(mainMetric);
             metricsContainer.div.transition()
-                .duration(300)   //mouseover transition does not seem to work, but that's minor
+                .duration(300)   // mouseover transition does not seem to work, but that's minor
                 .style("opacity", 0)
                 .transition()
                 .style("display", "none");
         } else {
             metricsContainer.div.transition()
-                .duration(300)   //mouseover transition does not seem to work, but that's minor
+                .duration(300)   // mouseover transition does not seem to work, but that's minor
                 .style("opacity", 1)
                 .style("display", "block");
         }
@@ -457,26 +459,32 @@
             .text(function(d) {
                 return metrics[d];
             })
-            .on('click', function(d) {
-                setWait();
-                d3.select(this.parentNode)
-                    .selectAll('li')
-                    .classed('selected', false)
-                ;
-                d3.select(this).classed('selected', true);
-
-                selectedMetric = d;
-
-                selectedData && updateTree(selectedData);
-
-                selectedData && makeSurface(selectedData);
-
-                unsetWait();
-            })
+            .on('click', changeMetric)
             .classed("selected", function(d) {
                 return d == selectedMetric;
             })
         ;
+    }
+
+    function changeMetric (d) {
+        setWait();
+        metricsContainer.div
+            .selectAll('li')
+            .classed('selected', false)
+        ;
+        metricsContainer.div
+            .selectAll('li')
+            .filter(function(one) { return one === d; })
+            .classed('selected', true)
+        ;
+
+        selectedMetric = d;
+
+        //selectedData && updateTree(selectedData);
+
+        selectedData && makeSurface(selectedData);
+
+        unsetWait();
     }
 
     !function() {
@@ -514,7 +522,7 @@
     function treeItemSelect(d) {
         setWait();
         makeSurface(d);
-        displayOrHideMetrics(d);
+        updateMetrics(d);
         unsetWait();
     }
 
