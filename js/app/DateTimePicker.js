@@ -2,9 +2,9 @@
     var d = new Date();
     var $startInput = $('#datetime-range-start');
     var $finishInput = $('#datetime-range-finish');
-    var finishVal = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate() + " 12:00 am";
+    var finishVal = _getDateString(d);
     d.setDate(d.getDate() - 7);
-    var startVal = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate() + " 12:00 am";
+    var startVal = _getDateString(d);
     $startInput.val(startVal);
     $finishInput.val(finishVal);
 
@@ -43,5 +43,16 @@
         });
       },
     };
+
+    function _getDateString(date) {
+      return (d.getDate() < 10 ? '0' : '') +
+        d.getDate() +
+        '.' +
+        (d.getMonth() < 10 ? '0' : '') +
+        d.getMonth() +
+        '.' +
+        d.getFullYear() +
+        " 12:00";
+    }
 })(app || (app = {}));
 
