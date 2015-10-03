@@ -604,13 +604,6 @@
             , transformedData = inData.filter(function(d, index, array) {
                 lastName = d.name || lastName;
 
-                if (lastName === "Содержание органов государственного управления") {
-                    lastName = "1. " + lastName;
-                }
-                else if (lastName === "Судебные учреждения, прокуратура и нотариат") {
-                    lastName = "2. " + lastName;
-                }
-
                 d.name = lastName;
                 hashNames[lastName] = 1;
 
