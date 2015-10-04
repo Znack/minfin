@@ -58,6 +58,10 @@
                 : ""
         });
 
+    function repeat (string, num) {
+        return new Array(num + 1).join(string);
+    }
+
     function textForTreeNodeYear(d) {
         var delta;
         if(!d)
@@ -237,7 +241,7 @@
             , data
             , i, j
             , max = 0
-            , years = {}
+            , years = []
             , name, year
             , entryDepth = d.depth
             ;
@@ -266,7 +270,7 @@
                 value = result[d[key]];
                 if(!value)
                     value = result[d[key]] = {};
-                years[d.year] = 1;
+                years.push(d.year);
                 value = value[d.year] = {
                     value : d[metric],
                     data : d
@@ -294,13 +298,10 @@
         }
 
         data = Object.keys(result);
-        years = Object.keys(years);
         j = years.length;
         i = data.length;
         if (!i || !j)
             return [[]];
-
-        years.sort().reverse();
 
         stack = new Array(i + 1);
         while(i--) {
@@ -315,7 +316,7 @@
                     value : value.value,
                     data : value.data,
                     name : name,
-                    year : year,
+                    year : year + repeat(' ', i * 10 + j),
                     normalized : value.value
                         ? value.value/(max||value.value)
                         : 0
@@ -623,6 +624,10 @@
                 d.subSubLevel = subSubLevel;
 
                 fixCosts(d);
+
+                if (d.year) {
+                    d.cell_id = d.year + '_' + index;
+                }
 
                 return d.year && d.name !== "Итого расходов";
             })
