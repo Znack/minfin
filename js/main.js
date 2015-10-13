@@ -754,7 +754,7 @@
     }
 
 
-    loadDataAndParseIt();
+    loadDataAndParseIt(app.dateTimePicker.startData);
     resize();
 
     app.dateTimePicker.onChange(function (dates) {

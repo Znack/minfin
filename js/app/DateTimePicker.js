@@ -34,6 +34,10 @@
     });
 
     app.dateTimePicker = {
+      startData: {
+          startDate: startVal,
+          finishDate: finishVal,
+      },
       onChange: function (callback) {
         $startInput.add($finishInput).change(function () {
           callback.call(this, {
