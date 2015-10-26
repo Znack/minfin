@@ -22,7 +22,7 @@
         , mainMetric = 'Effectiveness'
         , colors = d3.scale.ordinal()
             .range(d3.range(50, 300, 20))
-        , yearReg = /^\d\d\.\d\d\.\d\d\d\d$/
+        , yearReg = /^\d\d[\.:]\d\d(\.\d\d\d\d)?$/
         //, yearReg = /^\d{4}$/
         ;
 
@@ -242,6 +242,7 @@
             , i, j
             , max = 0
             , years = []
+            , allPossibleYears = []
             , name, year
             , entryDepth = d.depth
             ;
@@ -259,8 +260,20 @@
         ;
 
         while(i--) {
+            // итерируем все ветки вглубь, начинаем с первой ветви
+            // обратить внимание, что внизу мы меняем i, когда переходим на более нижний уровень
+
+            // переменная stack используется, чтобы хранить с какого состояния мы перешли на нижний уровень,
+            // допустим мы на уровне 2 и индекс равен 5, мы переходим на уровень 3, индекс сбрасываем до 0
+            // а в stack заносим как раз текущего родителя (который ур.2 индекс 5), чтобы после просмотра 3 уровня
+            // вернуться к тому же элементу на втором. Кстати, когда мы на втором уровне, в стеке где-то выше ещё
+            // должна лежать ссылка на текущего родителя из уровня 1
+
+            // чтобы года не дублировались при повторном обходе соседних веток, надо для каждой ветки её года сохранять
+            // в отдельную переменную, а потом среди них уже искать все возможные варианты
             d = data[i];
             if(yearReg.test(d.key)) {
+                // условие сработает, если мы дошли до самого низа одной из веток
                 d = safeValues(d)[0];
 
                 if (key != 'name' && entryDepth > 1 && d[key] == d['subLevel']) {
@@ -270,7 +283,8 @@
                 value = result[d[key]];
                 if(!value)
                     value = result[d[key]] = {};
-                years.push(d.year);
+                years[stack[0].i] = years[stack[0].i] || [];
+                years[stack[0].i].push(d.year);
                 value = value[d.year] = {
                     value : d[metric],
                     data : d
@@ -291,14 +305,28 @@
                 i = data.length;
             }
             if (!i && stack.length) {
+                // если в стеке что-то есть, значит мы ещё не на самом верхнем уровне, однако
+                // i уже закончилась, значит мы должны вернуться на уровень вверх
                 d = stack.pop();
                 data = d.data;
                 i = d.i;
             }
         }
 
-        data = Object.keys(result);
         j = years.length;
+        while(j--) {
+            i = years[j].length;
+            while(i--) {
+                if (allPossibleYears.indexOf(years[j][i]) === -1) {
+                    allPossibleYears.push(years[j][i]);
+                }
+            }
+        }
+
+
+
+        data = Object.keys(result);
+        j = allPossibleYears.length;
         i = data.length;
         if (!i || !j)
             return [[]];
@@ -306,10 +334,10 @@
         stack = new Array(i + 1);
         while(i--) {
             name = data[i];
-            j = years.length;
+            j = allPossibleYears.length;
             stack[i] = new Array(j + 1);
             while(j--) {
-                year = years[j];
+                year = allPossibleYears[j];
                 value = result[name];
                 value = value[year];
                 stack[i][j] = value ? {
@@ -324,10 +352,9 @@
             }
             stack[i][stack[i].length - 1] = getZero(name, 0);
         }
-        stack[stack.length - 1] = years.map(getZero);
+        stack[stack.length - 1] = allPossibleYears.map(getZero);
         stack[stack.length - 1].push(getZero());
 
-        console.log(stack);
         return stack;
     }
 

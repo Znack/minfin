@@ -49,13 +49,14 @@
     };
 
     function _getDateString(date) {
-      return (d.getDate() < 10 ? '0' : '') +
-        d.getDate() +
+      var month = date.getMonth() + 1;
+      return (date.getDate() < 10 ? '0' : '') +
+        date.getDate() +
         '.' +
-        (d.getMonth() < 10 ? '0' : '') +
-        d.getMonth() +
+        (month < 10 ? '0' : '') +
+        month +
         '.' +
-        d.getFullYear() +
+        date.getFullYear() +
         " 12:00";
     }
 })(app || (app = {}));
