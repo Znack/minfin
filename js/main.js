@@ -23,7 +23,6 @@
         , colors = d3.scale.ordinal()
             .range(d3.range(50, 300, 20))
         , yearReg = /^\d\d[\.:]\d\d(\.\d\d\d\d)?$/
-        //, yearReg = /^\d{4}$/
         ;
 
     var ui = d3.select('#ui')
