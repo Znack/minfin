@@ -266,7 +266,7 @@ layers.TreeBar = function(options) {
         x.range([0, width]);
         y.range([0, height]);
 
-        refreshNode();
+        node && refreshNode();
         // root && updateNew(getRoot(root), root);
         return that;
     };

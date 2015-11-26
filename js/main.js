@@ -748,10 +748,12 @@
         };
     }
 
+    var loadingAttempts = 0;
     function loadDataAndParseIt (options) {
+        loadingAttempts++;
         var url = 'http://mondzo.ddns.net:4077/execsvcscriptplain?name=testAuth&startparam1=data&';
         if (developmentMode) {
-            url = 'data/sample.csv?';
+            url = 'data/sample' + loadingAttempts % 2 + '.csv?';
         }
 
         if (options && options.startDate) {
