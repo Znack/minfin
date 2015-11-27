@@ -314,10 +314,12 @@
 
         j = years.length;
         while(j--) {
-            i = years[j].length;
-            while(i--) {
-                if (allPossibleYears.indexOf(years[j][i]) === -1) {
-                    allPossibleYears.push(years[j][i]);
+            if (years[j]) {
+                i = years[j].length;
+                while(i--) {
+                    if (allPossibleYears.indexOf(years[j][i]) === -1) {
+                        allPossibleYears.push(years[j][i]);
+                    }
                 }
             }
         }
