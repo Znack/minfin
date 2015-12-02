@@ -8,7 +8,6 @@
 (function() {
     var developmentMode = true
         , rawData
-        , tree
         , width = innerWidth
         , height = innerHeight
         , selectedMetric
@@ -159,7 +158,6 @@
 
         tooltip.spaceWidth(width)
             .spaceHeight(height);
-        //tree && tree.resize();
         surface && surface.resize();
     }
 
@@ -168,27 +166,6 @@
     bottomBar.div
         .attr('id', 'bottomBar')
         .classed('override', true)
-    ;
-
-    function toggleBar() {
-        bottomBar.container.classed("open", !bottomBar.container.classed("open"));
-    }
-
-    bottomBar.div.append("span").attr("class", "before").on('click', toggleBar);
-
-    setTimeout(toggleBar, 2000);
-
-    bottomBar = layers.layer().addTo(bottomBar.div);
-
-    var treeContainer = bottomBar.div
-        .append('div')
-        .style({
-            'position': 'absolute',
-            'width': '100%',
-            //'bottom': '4px',
-            'height': '176px'
-        })
-        .attr('class', 'left top')
     ;
 
     var progress = layers.progressBar().addTo(
@@ -451,20 +428,6 @@
         }
     }
 
-    function treeColor(d) {
-        var key = d.key
-            , l = 0
-            , mkey = "mv_" + selectedMetric
-            ;
-        if (yearReg.test(d.key)) {
-            key = d.parent.key;
-            l = d.parent[mkey] ? d.value / d.parent[mkey] : 0
-        }
-        var c = d.key ? colors(key) : 0;
-        c = d3.hsl(c, 1, .5 + l/2).rgb();
-        return "rgb(" + parseInt(c.r) + "," + parseInt(c.g) + "," + parseInt(c.b) + ")";
-    }
-
     function initMetrics() {
         metricsContainer.div.selectAll('ul')
             .remove();
@@ -509,8 +472,6 @@
 
         selectedMetric = d;
 
-        //selectedData && updateTree(selectedData);
-
         selectedData && makeSurface(selectedData);
 
         unsetWait();
@@ -548,44 +509,6 @@
         d3.select("body").classed('wait', false);
     }
 
-    function treeItemSelect(d) {
-        setWait();
-        makeSurface(d);
-        updateMetrics(d);
-        unsetWait();
-    }
-
-    function treeItemOver(d) {
-        tooltip.mouseover(d);
-        hovered = d;
-        currentSurface.colorize();
-        currentSurface.highlightEdgeByKey(d ? d.key : null);
-    }
-
-    var treeItemOut = surfaceCellOut;
-
-    function initTree(data) {
-        if (tree)
-            tree.remove();
-        else {
-            tree = layers.treeBar();
-            tree.on('select', treeItemSelect)
-            .on('mouseover', treeItemOver)
-            .on('mouseout', treeItemOut)
-            .on('mousemove', tooltip.mousemove)
-            ;
-        }
-
-        tree.addTo(treeContainer)
-            .color(treeColor)
-            .data(data);
-    }
-
-    function updateTree(selected) {
-        rawData.values.forEach(restructure(rawData));
-        tree && tree.data(rawData, selected);
-    }
-
     /**
      * @param {string} cost
      * @returns {number}
@@ -620,7 +543,6 @@
             progress.title('Not data!')
                 .position(100);
             err && app.logErr(err);
-            return initTree(data);
         }
 
         var lastName
@@ -698,7 +620,7 @@
         initMetrics(metrics);
 
         rawData.values.forEach(restructure(rawData));
-        initTree(rawData);
+        makeSurface(rawData);
 
     }
 
