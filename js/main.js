@@ -11,23 +11,30 @@
         , width = innerWidth
         , height = innerHeight
         , selectedMetric
+        , selectedHospital
         , selectedData
         , metrics = {
-            Effectiveness : "Итого по бюджетам"
-            , Load : "Республиканские бюджеты"
-            , Quality : "Местные бюджеты"
-            , NSabonents : "Союзный бюджет"
+            Effectiveness : "Эффективность"
+            , Load : "Нагрузка"
+            , Quality : "Качество"
+            , NSabonents : "Абоненты"
         }
         , mainMetric = 'Effectiveness'
         , colors = d3.scale.ordinal()
             .range(d3.range(50, 300, 20))
         , yearReg = /^\d\d[\.:]\d\d(\.\d\d\d\d)?$/
+        , reg = /^[IVX]+/
+        , reg2 = /^\d+/
+        , reg3 = /^.\)/
+        , hideItems = []
+        , hideValues = []
         ;
 
     var ui = d3.select('#ui')
         , vis = d3.select('#vis').append('div')
         , surfaceContainer = layers.layer().addTo(vis)
         , metricsContainer = layers.layer({position: "top right menu"}).addTo(vis)
+        , hospitalListContainer = layers.layer({position: "left menu"}).addTo(vis)
         , controls = layers.layer({position: "top right menu"}).addTo(ui)
         , bottomBar = layers.layer({position : "bottom left"}).addTo(ui)
         , df = d3.format(",.2f")
@@ -477,6 +484,101 @@
         unsetWait();
     }
 
+    function initHospitalList(hospitalNames){
+        var masHospitals = {};
+        var count = 0;
+
+        hospitalNames = hospitalNames.filter(function (name) {
+            return reg.test(name)
+        });
+
+        hospitalListContainer.div.selectAll('ul')
+            .remove();
+
+        if (!hospitalNames || !selectedHospital)
+            selectedHospital = null;
+
+        //selectedHospital = !selectedHospital
+        //    ? (data && data.length ? data[0] : null)
+        //    : selectedHospital;
+
+        hospitalListContainer.div.style("top","40%")
+            .append('ul')
+            .selectAll('li')
+            .data(hospitalNames)
+            .enter()
+            .append('li')
+            .text(function(d) {
+                return d;
+            })
+            .on('click', changeHospitalList)
+            .classed("selected", true)
+        ;
+    }
+
+    function changeHospitalList (d) {
+        var addOrHideData;
+        setWait();
+        hospitalListContainer.div
+            .selectAll('li')
+            .filter(function(one) {
+                return one === d;
+            })
+            .classed('selected', function(d){
+                if (this.className !== "selected") {
+                    addOrHideData = true;
+                    return true;
+                }
+                addOrHideData = false;
+                return false;
+            })
+        ;
+
+        if (addOrHideData){
+            var addItem = hideItems.filter(function(item){
+                if (item.key === d){
+                    return item
+                }
+            })[0];
+            hideItems = hideItems.filter(function(item){
+                if (item.key !== d){
+                    return item
+                }
+            });
+            var addValue = hideValues.filter(function(value){
+                if (value.key === d){
+                    return value
+                }
+            })[0];
+            hideValues = hideValues.filter(function(value){
+                if (value.key !== d){
+                    return value
+                }
+            });
+
+            selectedData.items.push(addItem);
+            selectedData.values.push(addValue);
+        }else{
+            selectedData.items = selectedData.items.filter(function(item){
+                if (item.key !== d){
+                    return item
+                }else{
+                    hideItems.push(item)
+                }
+            });
+            selectedData.values = selectedData.values.filter(function(value){
+                if (value.key !== d){
+                    return value
+                }else{
+                    hideValues.push(value)
+                }
+            })
+        }
+
+        selectedData && makeSurface(selectedData);
+        unsetWait();
+    }
+
     !function() {
         var temp = d3.select("#controls").html();
         controls.div.style("top","40%").html(temp);
@@ -549,9 +651,6 @@
             , level
             , subLevel
             , subSubLevel
-            , reg = /^[IVX]+/
-            , reg2 = /^\d+/
-            , reg3 = /^.\)/
             , transformedData = inData.filter(function(d, index, array) {
                 lastName = d.name || lastName;
 
@@ -618,6 +717,7 @@
         ;
 
         initMetrics(metrics);
+        initHospitalList(hashNames);
 
         rawData.values.forEach(restructure(rawData));
         makeSurface(rawData);
