@@ -233,15 +233,6 @@
         data = safeValues(d);
         i = data.length;
 
-        var key = entryDepth == 0
-            ? 'level'
-            : entryDepth == 1
-                ? 'subLevel'
-                : entryDepth == 2
-                ? 'subSubLevel'
-                : 'name'
-        ;
-
         while(i--) {
             // итерируем все ветки вглубь, начинаем с первой ветви
             // обратить внимание, что внизу мы меняем i, когда переходим на более нижний уровень
@@ -259,13 +250,9 @@
                 // условие сработает, если мы дошли до самого низа одной из веток
                 d = safeValues(d)[0];
 
-                if (key != 'name' && entryDepth > 1 && d[key] == d['subLevel']) {
-                    key = 'name';
-                }
-
-                value = result[d[key]];
+                value = result[d.name];
                 if(!value)
-                    value = result[d[key]] = {};
+                    value = result[d.name] = {};
                 years[stack[0].i] = years[stack[0].i] || [];
                 years[stack[0].i].push(d.year);
                 value = value[d.year] = {
@@ -307,8 +294,6 @@
                 }
             }
         }
-
-
 
         data = Object.keys(result);
         j = allPossibleYears.length;
@@ -485,22 +470,12 @@
     }
 
     function initHospitalList(hospitalNames){
-        var masHospitals = {};
-        var count = 0;
-
-        hospitalNames = hospitalNames.filter(function (name) {
-            return reg.test(name)
-        });
 
         hospitalListContainer.div.selectAll('ul')
             .remove();
 
         if (!hospitalNames || !selectedHospital)
             selectedHospital = null;
-
-        //selectedHospital = !selectedHospital
-        //    ? (data && data.length ? data[0] : null)
-        //    : selectedHospital;
 
         hospitalListContainer.div.style("top","40%")
             .append('ul')
@@ -534,47 +509,66 @@
             })
         ;
 
+        addHideItemOrValue = function(item){
+            if (item.key === d){
+                return item
+            }
+        };
+        updateHideItemOrValue = function(item){
+            if (item.key !== d){
+                return item
+            }
+        };
+        hideItemOrValue = function(item){
+            if (item.key !== d){
+                return item
+            }else{
+                hideItems.push(item)
+            }
+        };
+
         if (addOrHideData){
-            var addItem = hideItems.filter(function(item){
-                if (item.key === d){
-                    return item
-                }
-            })[0];
-            hideItems = hideItems.filter(function(item){
-                if (item.key !== d){
-                    return item
-                }
-            });
-            var addValue = hideValues.filter(function(value){
-                if (value.key === d){
-                    return value
-                }
-            })[0];
-            hideValues = hideValues.filter(function(value){
-                if (value.key !== d){
-                    return value
-                }
-            });
+            var addItem = hideItems.filter(addHideItemOrValue)[0];
+            hideItems = hideItems.filter(updateHideItemOrValue);
+
+            var addValue = hideValues.filter(addHideItemOrValue)[0];
+            hideValues = hideValues.filter(updateHideItemOrValue);
 
             selectedData.items.push(addItem);
             selectedData.values.push(addValue);
         }else{
-            selectedData.items = selectedData.items.filter(function(item){
-                if (item.key !== d){
-                    return item
-                }else{
-                    hideItems.push(item)
-                }
-            });
-            selectedData.values = selectedData.values.filter(function(value){
-                if (value.key !== d){
-                    return value
-                }else{
-                    hideValues.push(value)
-                }
-            })
+            selectedData.items = selectedData.items.filter(hideItemOrValue);
+            selectedData.values = selectedData.values.filter(hideItemOrValue);
         }
 
+        function deromanize (str) {
+            var	str = str.toUpperCase(),
+                validator = /^M*(?:D?C{0,3}|C[MD])(?:L?X{0,3}|X[CL])(?:V?I{0,3}|I[XV])$/,
+                token = /[MDLV]|C[MD]?|X[CL]?|I[XV]?/g,
+                key = {M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1},
+                num = 0, m;
+            if (!(str && validator.test(str)))
+                return false;
+            while (m = token.exec(str))
+                num += key[m[0]];
+            return num;
+        }
+
+        selectedData.items.sort(function(itemA, itemB){
+            try {
+                var numberItemA = /(\w+)\..*/g.exec(itemA.key)[1];
+            } catch(err) {
+                return 1
+            }
+            try {
+                var numberItemB = /(\w+)\..*/g.exec(itemB.key)[1];
+            } catch(err) {
+                return -1
+            }
+
+
+            return +deromanize(numberItemA) - (+deromanize(numberItemB));
+        });
         selectedData && makeSurface(selectedData);
         unsetWait();
     }
@@ -647,69 +641,20 @@
             err && app.logErr(err);
         }
 
-        var lastName
-            , level
-            , subLevel
-            , subSubLevel
-            , transformedData = inData.filter(function(d, index, array) {
-                lastName = d.name || lastName;
+        data = inData[0].values;
 
-                d.name = lastName;
-                hashNames[lastName] = 1;
-
-                if (reg.test(d.name)) {
-                    level = d.name;
-                    subLevel = level;
-                    subSubLevel = level;
-                } else if (reg2.test(d.name)) {
-                    subLevel = d.name;
-                    subSubLevel = subLevel;
-                } else if (reg3.test(d.name)) {
-                    subSubLevel = d.name;
-                }
-
-                d.level = level;
-                d.subLevel = subLevel;
-                d.subSubLevel = subSubLevel;
-
-                fixCosts(d);
-
-                if (d.year) {
-                    d.cell_id = d.year + '_' + index;
-                }
-
-                return d.year && d.name !== "Итого расходов";
-            })
-            ;
-
-        data = d3.nest()
-            .key(function(d) {
-                return d.level;
-            })
-            .key(function(d) {
-                return d.subLevel;
-            })
-            .key(function(d) {
-                return d.subSubLevel;
-            })
-            .key(function(d) {
-                return d.name;
-            })
-            .key(function(d) {
-                return d.year;
-            })
-            .entries(transformedData)
-        ;
         rawData = {
             key : "История бюджета 1937 - 1950гг.",
             values : data,
             items : data
         };
 
-        hashNames = Object.keys(hashNames);
+        hashNames = data.map(function(item){
+            return item.key
+        });
 
         colors
-            .range(d3.range(0, 300, 500/(hashNames.length||1)))
+            .range(d3.range(0, 300, 500/(hashNames.length+1||1)))
             .domain(hashNames);
 
         progress.position(100)
@@ -721,7 +666,6 @@
 
         rawData.values.forEach(restructure(rawData));
         makeSurface(rawData);
-
     }
 
     var globalParentIndex = 0;
@@ -777,15 +721,16 @@
         loadingAttempts++;
         var url = 'http://mondzo.ddns.net:4077/execsvcscriptplain?name=testAuth&startparam1=data&';
         if (developmentMode) {
-            url = 'data/sample' + loadingAttempts % 2 + '.csv?';
+            //url = 'data/sample' + loadingAttempts % 2 + '.csv?';
+            url = 'data/data.json';
         }
 
-        if (options && options.startDate) {
-            url += 'startparam2=' + options.startDate + '&';
-        }
-        if (options && options.finishDate) {
-            url += 'startparam3=' + options.finishDate + '&';
-        }
+        //if (options && options.startDate) {
+        //    url += 'startparam2=' + options.startDate + '&';
+        //}
+        //if (options && options.finishDate) {
+        //    url += 'startparam3=' + options.finishDate + '&';
+        //}
 
         app.dataLoader({
             beforesend : function() {
