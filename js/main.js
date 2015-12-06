@@ -485,22 +485,12 @@
     }
 
     function initHospitalList(hospitalNames){
-        var masHospitals = {};
-        var count = 0;
-
-        hospitalNames = hospitalNames.filter(function (name) {
-            return reg.test(name)
-        });
 
         hospitalListContainer.div.selectAll('ul')
             .remove();
 
         if (!hospitalNames || !selectedHospital)
             selectedHospital = null;
-
-        //selectedHospital = !selectedHospital
-        //    ? (data && data.length ? data[0] : null)
-        //    : selectedHospital;
 
         hospitalListContainer.div.style("top","40%")
             .append('ul')
@@ -534,47 +524,66 @@
             })
         ;
 
+        addHideItemOrValue = function(item){
+            if (item.key === d){
+                return item
+            }
+        };
+        updateHideItemOrValue = function(item){
+            if (item.key !== d){
+                return item
+            }
+        };
+        hideItemOrValue = function(item){
+            if (item.key !== d){
+                return item
+            }else{
+                hideItems.push(item)
+            }
+        };
+
         if (addOrHideData){
-            var addItem = hideItems.filter(function(item){
-                if (item.key === d){
-                    return item
-                }
-            })[0];
-            hideItems = hideItems.filter(function(item){
-                if (item.key !== d){
-                    return item
-                }
-            });
-            var addValue = hideValues.filter(function(value){
-                if (value.key === d){
-                    return value
-                }
-            })[0];
-            hideValues = hideValues.filter(function(value){
-                if (value.key !== d){
-                    return value
-                }
-            });
+            var addItem = hideItems.filter(addHideItemOrValue)[0];
+            hideItems = hideItems.filter(updateHideItemOrValue);
+
+            var addValue = hideValues.filter(addHideItemOrValue)[0];
+            hideValues = hideValues.filter(updateHideItemOrValue);
 
             selectedData.items.push(addItem);
             selectedData.values.push(addValue);
         }else{
-            selectedData.items = selectedData.items.filter(function(item){
-                if (item.key !== d){
-                    return item
-                }else{
-                    hideItems.push(item)
-                }
-            });
-            selectedData.values = selectedData.values.filter(function(value){
-                if (value.key !== d){
-                    return value
-                }else{
-                    hideValues.push(value)
-                }
-            })
+            selectedData.items = selectedData.items.filter(hideItemOrValue);
+            selectedData.values = selectedData.values.filter(hideItemOrValue);
         }
 
+        function deromanize (str) {
+            var	str = str.toUpperCase(),
+                validator = /^M*(?:D?C{0,3}|C[MD])(?:L?X{0,3}|X[CL])(?:V?I{0,3}|I[XV])$/,
+                token = /[MDLV]|C[MD]?|X[CL]?|I[XV]?/g,
+                key = {M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1},
+                num = 0, m;
+            if (!(str && validator.test(str)))
+                return false;
+            while (m = token.exec(str))
+                num += key[m[0]];
+            return num;
+        }
+
+        selectedData.items.sort(function(itemA, itemB){
+            try {
+                var numberItemA = /(\w+)\..*/g.exec(itemA.key)[1];
+            } catch(err) {
+                return 1
+            }
+            try {
+                var numberItemB = /(\w+)\..*/g.exec(itemB.key)[1];
+            } catch(err) {
+                return -1
+            }
+
+
+            return +deromanize(numberItemA) - (+deromanize(numberItemB));
+        });
         selectedData && makeSurface(selectedData);
         unsetWait();
     }
