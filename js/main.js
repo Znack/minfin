@@ -520,10 +520,12 @@
             }
         }
         function hideItemOrValue(item){
-            if (item.key !== d){
-                return item
-            }else{
-                hideItems.push(item)
+            if(item){
+                if (item.key !== d){
+                    return item
+                }else{
+                    hideItems.push(item)
+                }
             }
         }
 
