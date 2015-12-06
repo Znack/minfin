@@ -509,23 +509,23 @@
             })
         ;
 
-        addHideItemOrValue = function(item){
+        function addHideItemOrValue(item){
             if (item.key === d){
                 return item
             }
-        };
-        updateHideItemOrValue = function(item){
+        }
+        function updateHideItemOrValue(item){
             if (item.key !== d){
                 return item
             }
-        };
-        hideItemOrValue = function(item){
+        }
+        function hideItemOrValue(item){
             if (item.key !== d){
                 return item
             }else{
                 hideItems.push(item)
             }
-        };
+        }
 
         if (addOrHideData){
             var addItem = hideItems.filter(addHideItemOrValue)[0];
