@@ -712,6 +712,9 @@
             .key(function(d) {
                 return d.year;
             })
+            .sortKeys(function(a,b) {
+                return (+b.replace(/[\.:\-]/g, '')) - (+a.replace(/[\.:\-]/g, ''));
+            })
             .entries(transformedData)
         ;
         rawData = {
