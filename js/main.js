@@ -257,14 +257,14 @@
                 years[stack[0].i].push(d.year);
                 value = value[d.year] = {
                     value : d[metric],
-                    data : d
+                    data : d,
                 };
                 max = Math.max(value.value, max);
             }
             else {
                 stack.push({
                     data : data,
-                    i : i
+                    i : i,
                 });
                 if(d.depth > 1 && d.key == d.parent.key && safeValues(d.parent).length > 1)
                     break;
@@ -305,12 +305,12 @@
         while(i--) {
             name = data[i];
             j = allPossibleYears.length;
-            stack[i] = new Array(j + 1);
+            stack[data.length - i - 1] = new Array(j + 1);
             while(j--) {
                 year = allPossibleYears[j];
                 value = result[name];
                 value = value[year];
-                stack[i][j] = value ? {
+                stack[data.length - i - 1][allPossibleYears.length - j - 1] = value ? {
                     value : value.value,
                     data : value.data,
                     name : name,
@@ -320,7 +320,7 @@
                         : 0
                 } : getZero(name, year);
             }
-            stack[i][stack[i].length - 1] = getZero(name, 0);
+            stack[data.length - i - 1][stack[data.length - i - 1].length - 1] = getZero(name, 0);
         }
         stack[stack.length - 1] = allPossibleYears.map(getZero);
         stack[stack.length - 1].push(getZero());
@@ -723,7 +723,7 @@
         loadingAttempts++;
         var url = 'http://mondzo.ddns.net:4077/execsvcscriptplain?name=testAuth&startparam1=data&';
         if (developmentMode) {
-            //url = 'data/sample' + loadingAttempts % 2 + '.csv?';
+            //url = 'data/sample' + loadingAttempts % 3 + '.csv?';
             url = 'data/data.json';
         }
 

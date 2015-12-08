@@ -15,22 +15,14 @@
 
     // Attach a change event to end time
 
-    $finishInput.appendDtpicker($.extend(baseDateTimePickerParams, {
-        minDate: startVal,
-    }));
+    $finishInput.appendDtpicker(baseDateTimePickerParams);
     $finishInput.change(function() {
-        $startInput.appendDtpicker($.extend(baseDateTimePickerParams, {
-            maxDate: $finishInput.val(), // when the end time changes, update the maxDate on the start field
-        }));
+        $startInput.appendDtpicker(baseDateTimePickerParams);
     });
 
-    $startInput.appendDtpicker($.extend(baseDateTimePickerParams, {
-        maxDate: finishVal,
-    }));
+    $startInput.appendDtpicker(baseDateTimePickerParams);
     $startInput.change(function() {
-        $finishInput.appendDtpicker($.extend(baseDateTimePickerParams, {
-            minDate: $startInput.val(), // when the start time changes, update the minDate on the end field
-        }));
+        $finishInput.appendDtpicker(baseDateTimePickerParams);
     });
 
     app.dateTimePicker = {
