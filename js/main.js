@@ -259,25 +259,21 @@
                 // условие сработает, если мы дошли до самого низа одной из веток
                 d = safeValues(d)[0];
 
-                if (key != 'name' && entryDepth > 1 && d[key] == d['subLevel']) {
-                    key = 'name';
-                }
-
-                value = result[d[key]];
+                value = result[d.name];
                 if(!value)
-                    value = result[d[key]] = {};
+                    value = result[d.name] = {};
                 years[stack[0].i] = years[stack[0].i] || [];
                 years[stack[0].i].push(d.year);
                 value = value[d.year] = {
                     value : d[metric],
-                    data : d
+                    data : d,
                 };
                 max = Math.max(value.value, max);
             }
             else {
                 stack.push({
                     data : data,
-                    i : i
+                    i : i,
                 });
                 if(d.depth > 1 && d.key == d.parent.key && safeValues(d.parent).length > 1)
                     break;
