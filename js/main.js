@@ -312,7 +312,6 @@
         if (!i || !j)
             return [[]];
 
-        stack = new Array(i + 1);
         while(i--) {
             name = data[i];
             j = allPossibleYears.length;
@@ -333,8 +332,6 @@
             }
             stack[data.length - i - 1][stack[data.length - i - 1].length - 1] = getZero(name, 0);
         }
-        stack[stack.length - 1] = allPossibleYears.map(getZero);
-        stack[stack.length - 1].push(getZero());
 
         return stack;
     }

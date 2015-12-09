@@ -156,6 +156,8 @@
                 , x, y
                 , xLength = data.length
                 , yLength = data[0].length
+                , rightBorder
+                , leftBorder
                 ;
             x = xLength;
             a = Math.min(displayWidth, displayHeight) || 1;
@@ -163,12 +165,19 @@
             kx = a*k/(xLength);
             ky = a*k/yLength;
             while(x--) {
-                t = [];
-                output.push(t);
+                leftBorder = [];
+                rightBorder = [];
+                output.push(leftBorder);
+                output.push(rightBorder);
                 y = yLength;
                 while(y--) {
-                    t.push(transformPoint([
+                    leftBorder.push(transformPoint([
                         (x - xLength / 2) * kx * zoom
+                        , asix ? 0 : heights[x][y] * zoom
+                        , (y - yLength / 2) * ky * zoom
+                    ]));
+                    rightBorder.push(transformPoint([
+                        (x + 1 - xLength / 2) * kx * zoom
                         , asix ? 0 : heights[x][y] * zoom
                         , (y - yLength / 2) * ky * zoom
                     ]));
@@ -226,7 +235,7 @@
                 , depth
             ;
 
-            for (x = 0; x < xLength - 1; x++) {
+            for (x = 0; x < data.length - 1; x++) {
 
                 d1[x] = d1[x] || [];
 
@@ -240,7 +249,7 @@
                     py = data[x][y][1] + h2;
                     dpx = w2 - px;
                     dpy = h2 - py;
-                    d = originData[x][y];
+                    d = originData[parseInt(x/2, 10)][y];
 
                     d0.push({
                         path: 'M0,0'
@@ -485,8 +494,8 @@
         var renderSurface = function () {
             var originData = node.datum()
                 , data = getTransformedData(originData)
-                , xLength = data.length
-                , yLength = data[0].length
+                , xLength = originData.length
+                , yLength = originData[0].length
                 , w2 = displayWidth/2
                 , h2 = displayHeight/2
             ;

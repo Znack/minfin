@@ -87,7 +87,7 @@ layers.Surface = function(options) {
                 pitch = drag[2] + (mouse[1] - drag[0][1]) / 50;
                 pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
 
-                console.log([yaw, pitch]);
+                //console.log([yaw, pitch]);
 
                 Object.keys(groups).forEach(function(key) {
                     groups[key]
