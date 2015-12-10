@@ -27,7 +27,6 @@
         , reg2 = /^\d+/
         , reg3 = /^.\)/
         , hideItems = []
-        , hideValues = []
         ;
 
     var ui = d3.select('#ui')
