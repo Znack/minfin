@@ -172,12 +172,12 @@
                 y = yLength;
                 while(y--) {
                     leftBorder.push(transformPoint([
-                        (x - xLength / 2) * kx * zoom
+                        (x - xLength / 2 - 1) * kx * zoom
                         , asix ? 0 : heights[x][y] * zoom
                         , (y - yLength / 2) * ky * zoom
                     ]));
                     rightBorder.push(transformPoint([
-                        (x + 1 - xLength / 2) * kx * zoom
+                        (x - xLength / 2) * kx * zoom
                         , asix ? 0 : heights[x][y] * zoom
                         , (y - yLength / 2) * ky * zoom
                     ]));
@@ -203,14 +203,14 @@
             for(x = -1; x < lx; x++) {
                 t = [];
                 output.push(t);
-                for(y = -1; y < ly; y++) {
-                    valx = (x - xhl) * kx * zoom;
-                    valy = (y - yhl) * ky * zoom;
+                valx = (x - xhl) * kx * zoom;
+                if (!(xLength - x))
+                    valx = (x -.8 - xhl) * kx * zoom;
+                else if (x < 0)
+                    valx = (-.2 - xhl) * kx * zoom;
 
-                    if (!(xLength - x))
-                        valx = (x -.8 - xhl) * kx * zoom;
-                    else if (x < 0)
-                        valx = (-.2 - xhl) * kx * zoom;
+                for(y = -1; y < ly; y++) {
+                    valy = (y - yhl) * ky * zoom;
 
                     if (!(yLength - y))
                         valy = (y -.8 - yhl) * ky * zoom;
@@ -386,7 +386,7 @@
             asix = node.selectAll('g.asix')
                 .data([asix.map(function (d) {
                     return [d[0][0] + w2 + px[0], d[0][1] + h2 + px[1]];
-                }), asix[xLength + 1].map(function (d) {
+                }), asix[asix.length - 1].map(function (d) {
                     return [d[0] + w2 + px[0], d[1] + h2 + px[1]];
                 })]
                 , function (d, i) {

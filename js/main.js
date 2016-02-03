@@ -228,6 +228,7 @@
             , allPossibleYears = []
             , name, year
             , entryDepth = d.depth
+            , stackTempRow
             ;
 
         data = safeValues(d);
@@ -312,15 +313,16 @@
         if (!i || !j)
             return [[]];
 
+        stack = [];
         while(i--) {
             name = data[i];
             j = allPossibleYears.length;
-            stack[data.length - i - 1] = new Array(j + 1);
+            stackTempRow = stack[data.length - i - 1] = new Array(j);
             while(j--) {
                 year = allPossibleYears[j];
                 value = result[name];
                 value = value[year];
-                stack[data.length - i - 1][allPossibleYears.length - j - 1] = value ? {
+                stackTempRow[allPossibleYears.length - j - 1] = value ? {
                     value : value.value,
                     data : value.data,
                     name : name,
@@ -330,7 +332,6 @@
                         : 0
                 } : getZero(name, year);
             }
-            stack[data.length - i - 1][stack[data.length - i - 1].length - 1] = getZero(name, 0);
         }
 
         return stack;
