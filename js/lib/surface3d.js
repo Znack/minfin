@@ -200,13 +200,13 @@
             kx = a*k/(xLength);
             ky = a*k/yLength;
             var valx, valy;
-            for(x = -1; x < lx; x++) {
+            for(x = -2; x < lx; x++) {
                 t = [];
                 output.push(t);
                 valx = (x - xhl) * kx * zoom;
                 if (!(xLength - x))
                     valx = (x -.8 - xhl) * kx * zoom;
-                else if (x < 0)
+                else if (x < -1)
                     valx = (-.2 - xhl) * kx * zoom;
 
                 for(y = -1; y < ly; y++) {
@@ -415,11 +415,11 @@
                     .data(d.slice(2).map(function (k, j) {
                         return {
                             point: k,
-                            name: j >= (i ? yLength - 1 : xLength - 1)
+                            name: j >= (i ? yLength - 1 : xLength)
                                 ? ""
                                 : i
                                 ? originData[0][yLength - j - 2].year
-                                : originData[xLength - j - 2][0].name
+                                : originData[xLength - j - 1][0].name
                         }
                     }), function (k) {
                         return k.name
